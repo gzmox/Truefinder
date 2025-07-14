@@ -1,33 +1,31 @@
+async function lookupNumber() {
+  const phone = document.getElementById("phoneInput").value.trim();
+  const resultBox = document.getElementById("result");
+  if (!phone) return alert("Du må skrive et telefonnummer!");
 
-function lookupNumber() {
-    const phone = document.getElementById("phoneInput").value.trim();
-    const resultBox = document.getElementById("result");
+  resultBox.innerHTML = 'Laster...';
+  resultBox.classList.remove("hidden");
 
-    if (!phone) {
-        alert("Please enter a phone number.");
-        return;
-    }
+  try {
+    const resp = await fetch('/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const d = await resp.json();
+    if (d.error) throw new Error(d.error);
 
-    // Simulated lookup data (mock)
-    const fakeData = {
-        number: phone,
-        name: "Unknown",
-        location: "Oslo, Norway",
-        carrier: "Telenor",
-        spamReports: 13,
-        tags: ["Fake job offer", "Robocall"]
-    };
-
-    const html = \`
-        <h2>Lookup Result</h2>
-        <p><strong>📞 Number:</strong> \${fakeData.number}</p>
-        <p><strong>👤 Possible Name:</strong> \${fakeData.name}</p>
-        <p><strong>📍 Location:</strong> \${fakeData.location}</p>
-        <p><strong>📶 Carrier:</strong> \${fakeData.carrier}</p>
-        <p><strong>🚨 Spam Reports:</strong> \${fakeData.spamReports}</p>
-        <p><strong>🗣 Tags:</strong> \${fakeData.tags.join(", ")}</p>
-    \`;
-
+    const html = `
+      <h2>Resultat</h2>
+      <p><strong>📞 Nummer:</strong> ${phone}</p>
+      <p><strong>📍 Lokasjon:</strong> ${d.country_code}, ${d.location}</p>
+      <p><strong>📶 Carrier:</strong> ${d.carrier}</p>
+      <p><strong>📱 Linjetype:</strong> ${d.line_type}</p>
+      <p><strong>🚨 Spam score:</strong> ${d.fraud_score || d.risk_score}</p>
+      <p><strong>👤 Navn (CNAM):</strong> ${d.name || 'Ukjent'}</p>
+    `;
     resultBox.innerHTML = html;
-    resultBox.classList.remove("hidden");
+  } catch (e) {
+    resultBox.innerHTML = `<p style="color:red;">Feil: ${e.message}</p>`;
+  }
 }
