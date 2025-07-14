@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TrueFinder (Live)</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; }
+    input, button { padding: 10px; font-size: 1rem; margin-top: 1em; width: 100%; }
+    .result { margin-top: 2em; background: #f0f0f0; padding: 1em; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 TrueFinder (uten API-nøkkel)</h1>
+  <input id="phone" placeholder="Skriv inn telefonnummer" />
+  <button onclick="lookup()">Søk</button>
+  <div id="result" class="result"></div>
+  <script>
+    async function lookup() {
+      const phone = document.getElementById('phone').value;
+      const res = await fetch('/lookup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      document.getElementById('result').innerHTML = data.error ?
+        '<b>Feil:</b> ' + data.error :
+        `<p><b>Nummer:</b> ${data.number}</p>
+         <p><b>Navn:</b> ${data.name}</p>
+         <p><b>Score:</b> ${data.score}</p>
+         <p><b>Type:</b> ${data.type}</p>
+         <p><b>Kommentar:</b> ${data.comment}</p>`;
+    }
+  </script>
+</body>
+</html>
